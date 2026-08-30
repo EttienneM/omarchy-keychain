@@ -7,8 +7,6 @@ search 1800-odd logins, copy a username, password or verification code, and
 re-authenticate when Apple asks. Passwords are never shown on screen.
 
 ![The keychain panel open in the Omarchy bar](docs/panel.png)
-
-
 ## This is the front end, not the engine
 
 The widget displays a vault that
