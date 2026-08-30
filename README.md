@@ -6,23 +6,8 @@ A key icon sits in the bar and tells you whether your vault is fresh. Click it t
 search 1800-odd logins, copy a username, password or verification code, and
 re-authenticate when Apple asks. Passwords are never shown on screen.
 
-```
-┌─────────────────────────────────────────────────┐
-│  iCloud Keychain                       synced   │
-│  you@example.com                                │
-│                                                 │
-│  1838       12        11m ago                   │
-│  logins     codes     synced                    │
-│  ─────────────────────────────────────────────  │
-│  Search 1838 logins…                            │
-│                                                 │
-│  [ Sync now ] [ Re-authenticate ] [ Hide My … ] │
-│                                                 │
-│  github.com (you@example.com)     417293  22s ▴ │
-│    [ Username ] [ Password ✓ ] [ Code ]         │
-│  github.com (work)                            ▾ │
-└─────────────────────────────────────────────────┘
-```
+![The keychain panel open in the Omarchy bar](docs/panel.png)
+
 
 ## This is the front end, not the engine
 
