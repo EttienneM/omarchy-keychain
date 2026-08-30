@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "icloud.keychain",
+  "name": "Keychain",
+  "version": "1.0.0",
+  "author": "EttienneM",
+  "license": "MIT",
+  "description": "iCloud Keychain state, verification codes, and one-click re-authentication in the Omarchy bar.",
+  "kinds": ["bar-widget"],
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Keychain",
+    "description": "Vault freshness at a glance, live verification codes, and copy-to-clipboard for logins synced from iCloud Keychain.",
+    "category": "Security",
+    "aliases": ["keychain", "passwords", "icloud"],
+    "allowMultiple": false,
+    "defaults": {
+      "refreshIntervalSec": 60,
+      "hideWhenHealthy": false
+    },
+    "schema": [
+      { "key": "refreshIntervalSec", "type": "integer", "label": "Status refresh (seconds)", "min": 15, "max": 900, "step": 15, "defaultValue": 60 },
+      { "key": "hideWhenHealthy", "type": "boolean", "label": "Only show the icon when attention is needed", "defaultValue": false }
+    ]
+  }
+}

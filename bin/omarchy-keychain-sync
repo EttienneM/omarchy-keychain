@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Sync the keychain and record the outcome. Notifies only when a human is needed,
+# so a healthy machine stays silent.
+set -uo pipefail
+source "$(dirname "$0")/omarchy-keychain-env"
+
+out="$("$ICP_BIN" sync </dev/null 2>&1)"; rc=$?
+now="$(date -Is)"
+
+needs_auth=0
+grep -qiE '2fa|re-authenticat|not signed in|expired' <<<"$out" && needs_auth=1
+
+python3 - "$STATE_FILE" "$rc" "$now" "$needs_auth" <<'PY' "$out"
+import json, sys
+path, rc, now, needs_auth, out = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4] == "1", sys.argv[5]
+json.dump({"ok": rc == 0, "at": now, "needs_auth": needs_auth and rc != 0,
+           "message": out.strip().splitlines()[-1] if out.strip() else ""},
+          open(path, "w"))
+PY
+
+if [ $rc -ne 0 ] && [ $needs_auth -eq 1 ]; then
+  notify-send -a "iCloud Keychain" -u critical \
+    "iCloud Keychain needs you" \
+    "Apple asked for a verification code. Click the keychain icon in the bar to re-authenticate."
+elif [ $rc -ne 0 ]; then
+  notify-send -a "iCloud Keychain" -u normal "Keychain sync failed" "${out##*$'\n'}"
+fi
+exit $rc

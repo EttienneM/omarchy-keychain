@@ -1,0 +1,8 @@
+[Unit]
+Description=Sync iCloud Keychain into the local vault
+After=anisette.service
+Wants=anisette.service
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/omarchy-keychain-sync

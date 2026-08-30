@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Put a username, password, or verification code on the clipboard.
+#
+# Takes argv, never a shell string, and pipes straight to wl-copy so the secret
+# never enters the caller's memory or scrollback. Success is silent - the button
+# in the bar widget shows the confirmation. Only a failure speaks up, because a
+# silent failure would look exactly like a successful copy.
+set -uo pipefail
+source "$(dirname "$0")/omarchy-keychain-env"
+domain="${1:?domain required}"; username="${2:-}"; kind="${3:-password}"
+
+fail() { notify-send -a "iCloud Keychain" -u critical "Copy failed" "$1"; exit 1; }
+
+# A username is already on screen and is not a secret, so it is copied directly
+# rather than round-tripping through the vault.
+if [ "$kind" = "username" ]; then
+  printf '%s' "$username" | wl-copy || fail "$domain"
+  exit 0
+fi
+
+args=(copy --domain "$domain")
+[ -n "$username" ] && args+=(--username "$username")
+[ "$kind" = "totp" ] && args+=(--totp)
+
+"$ICP_BIN" "${args[@]}" | wl-copy || fail "$domain"

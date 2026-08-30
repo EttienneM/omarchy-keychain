@@ -1,0 +1,14 @@
+[Unit]
+Description=Keep the iCloud Keychain vault fresh
+
+[Timer]
+# Every 4h keeps the vault under the 6h staleness threshold, so the browser
+# extension's own auto-sync never has to fire. Sync becomes scheduled and
+# predictable instead of a side effect of the extension pinging the host.
+OnBootSec=3min
+OnUnitActiveSec=4h
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

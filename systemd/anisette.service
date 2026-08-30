@@ -1,0 +1,17 @@
+[Unit]
+Description=Anisette server for icp (iCloud Keychain on Linux)
+Documentation=https://github.com/Sank6/iCloud-Keychain-for-Linux
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# `docker start` itself trips the socket-activated daemon, so docker.service
+# does not need to be enabled at boot.
+ExecStart=/usr/bin/docker start anisette
+# Provisioning takes ~7s; don't report "active" until it serves real machine data.
+ExecStartPost=/usr/bin/bash -c 'for i in $(seq 1 30); do curl -sf http://localhost:6969/ 2>/dev/null | grep -q X-Apple-I-MD && exit 0; sleep 1; done; exit 1'
+ExecStop=/usr/bin/docker stop anisette
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Shared configuration for the omarchy-keychain helpers.
+#
+# The widget is a front end for `icp`, which lives in a separate checkout. This
+# resolves where that is, in order of preference:
+#
+#   1. $ICP_HOME from the environment
+#   2. ~/.config/omarchy-keychain.conf   (written by install.sh)
+#   3. a few conventional clone locations
+#   4. an `icp` already on PATH
+
+[ -r "$HOME/.config/omarchy-keychain.conf" ] && . "$HOME/.config/omarchy-keychain.conf"
+
+if [ -z "${ICP_HOME:-}" ]; then
+  for d in \
+    "$HOME/Code/iCloud-Keychain-for-Omarchy" \
+    "$HOME/Code/omakeychain/src" \
+    "$HOME/src/iCloud-Keychain-for-Omarchy" \
+    "$HOME/.local/share/icp"
+  do
+    if [ -x "$d/.venv/bin/icp" ]; then ICP_HOME="$d"; break; fi
+  done
+fi
+
+if [ -n "${ICP_HOME:-}" ] && [ -x "$ICP_HOME/.venv/bin/icp" ]; then
+  ICP_BIN="$ICP_HOME/.venv/bin/icp"
+else
+  ICP_BIN="$(command -v icp || true)"
+fi
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/keychain"
+mkdir -p "$STATE_DIR"
+STATE_FILE="$STATE_DIR/last-sync.json"
+
+if [ -z "${ICP_BIN:-}" ]; then
+  notify-send -a "iCloud Keychain" -u critical "icp not found" \
+    "Set ICP_HOME in ~/.config/omarchy-keychain.conf" 2>/dev/null || true
+  echo "icp not found; set ICP_HOME in ~/.config/omarchy-keychain.conf" >&2
+  exit 1
+fi

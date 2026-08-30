@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Open a floating terminal running the interactive flow. The password prompt stays
+# in a terminal on purpose - piping credentials through the shell process would be
+# a worse security posture for a cosmetic gain.
+set -uo pipefail
+source "$(dirname "$0")/omarchy-keychain-env"
+action="${1:-login}"   # login | show
+
+exec setsid xdg-terminal-exec --app-id=omarchy-keychain-auth -- \
+  bash -lc "cd '$ICP_HOME' && source .venv/bin/activate && icp $action; echo; read -rp 'Press enter to close...'"

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Merge icp's own state with the last sync outcome into a single object,
+# so the widget makes exactly one call.
+set -uo pipefail
+source "$(dirname "$0")/omarchy-keychain-env"
+
+status="$("$ICP_BIN" status --no-probe 2>/dev/null)" || status='{}'
+python3 - "$STATE_FILE" <<'PY' "$status"
+import json, os, sys
+state_file, status = sys.argv[1], sys.argv[2]
+try: data = json.loads(status)
+except Exception: data = {}
+last = {}
+if os.path.exists(state_file):
+    try: last = json.load(open(state_file))
+    except Exception: last = {}
+data["last_sync"] = last
+age = data.get("vault_age_seconds")
+data["stale"] = age is not None and age > 6 * 3600
+data["needs_auth"] = bool(last.get("needs_auth")) or not data.get("signed_in", False) \
+    or not data.get("octagon_joined", False)
+print(json.dumps(data))
+PY
