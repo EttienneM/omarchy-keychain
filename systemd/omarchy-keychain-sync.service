@@ -6,3 +6,6 @@ Wants=anisette.service
 [Service]
 Type=oneshot
 ExecStart=%h/.local/bin/omarchy-keychain-sync
+# Backstop only: the script caps icp itself at 5m (plus 30s to kill) so it can
+# still record the failure and notify. This catches the script hanging.
+TimeoutStartSec=7min

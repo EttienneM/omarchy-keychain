@@ -4,7 +4,15 @@
 set -uo pipefail
 source "$(dirname "$0")/omarchy-keychain-env"
 
-out="$("$ICP_BIN" sync </dev/null 2>&1)"; rc=$?
+# A healthy sync takes under a minute. The cap matters because icp's Secret Service
+# calls have no timeout of their own: an unlock request queued behind a wedged
+# gnome-keyring prompt waits forever, and while this oneshot never finishes the
+# timer never fires again.
+SYNC_TIMEOUT="${SYNC_TIMEOUT:-5m}"
+out="$(timeout --kill-after=30s "$SYNC_TIMEOUT" "$ICP_BIN" sync </dev/null 2>&1)"; rc=$?
+if [ $rc -eq 124 ] || [ $rc -eq 137 ]; then
+  out+=$'\n'"Sync timed out after $SYNC_TIMEOUT (keyring unlock or network stuck); will retry on the next run."
+fi
 now="$(date -Is)"
 
 needs_auth=0
